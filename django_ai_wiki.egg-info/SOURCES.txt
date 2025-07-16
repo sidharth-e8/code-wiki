@@ -1,0 +1,12 @@
+README.md
+setup.py
+aiwiki/__init__.py
+aiwiki/cli.py
+aiwiki/server.py
+aiwiki/templates/index.html
+django_ai_wiki.egg-info/PKG-INFO
+django_ai_wiki.egg-info/SOURCES.txt
+django_ai_wiki.egg-info/dependency_links.txt
+django_ai_wiki.egg-info/entry_points.txt
+django_ai_wiki.egg-info/requires.txt
+django_ai_wiki.egg-info/top_level.txt

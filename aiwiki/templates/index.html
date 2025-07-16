@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Wiki Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .download-buttons {
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .chat-section {
+            background: white;
+            border: 2px solid #667eea;
+        }
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .chat-response {
+            min-height: 100px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: inherit;
+        }
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .mermaid-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+        }
+        pre code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            display: block;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Wiki Dashboard</h1>
+            <p>Auto-generated documentation and interactive chat for your Django project</p>
+        </div>
+        
+        <div class="content">
+            <!-- Documentation Section -->
+            <div class="section">
+                <h2>📚 Project Documentation</h2>
+                <div class="download-buttons">
+                    <a href="/download/models.md" class="btn">📥 Download Models.md</a>
+                    <a href="/download/diagram.md" class="btn btn-secondary">📥 Download Diagram.md</a>
+                </div>
+                <div class="documentation-content">
+                    {{ models_html|safe }}
+                </div>
+            </div>
+            
+            <!-- Diagram Section -->
+            {% if diagram_code %}
+            <div class="section">
+                <h2>📊 Project Diagram</h2>
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                        {{ diagram_code|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Chat Section -->
+            <div class="section chat-section">
+                <h2>💬 Ask Questions About Your Project</h2>
+                <div class="chat-input">
+                    <input type="text" id="questionInput" placeholder="Ask anything about your Django project..." maxlength="500">
+                    <button class="btn" onclick="askQuestion()">Ask</button>
+                </div>
+                <div id="chatResponse" class="chat-response">
+                    Ask a question about your project and I'll help you based on the documentation!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        // Chat functionality
+        async function askQuestion() {
+            const input = document.getElementById('questionInput');
+            const responseDiv = document.getElementById('chatResponse');
+            const question = input.value.trim();
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            // Show loading state
+            responseDiv.textContent = 'Thinking...';
+            responseDiv.className = 'chat-response loading';
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    responseDiv.textContent = data.answer;
+                    responseDiv.className = 'chat-response';
+                } else {
+                    responseDiv.textContent = `Error: ${data.error}`;
+                    responseDiv.className = 'chat-response error';
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+                responseDiv.className = 'chat-response error';
+            }
+            
+            // Clear input
+            input.value = '';
+        }
+        
+        // Allow Enter key to submit question
+        document.getElementById('questionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>

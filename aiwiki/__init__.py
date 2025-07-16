@@ -1,0 +1,1 @@
+# Django AI Wiki Package

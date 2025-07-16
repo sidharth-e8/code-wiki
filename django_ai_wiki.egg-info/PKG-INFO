@@ -1,0 +1,41 @@
+Metadata-Version: 2.4
+Name: django-ai-wiki
+Version: 0.1.0
+Summary: Auto-generate a browsable, searchable technical wiki from your Django REST codebase using AI
+Home-page: https://github.com/yourusername/django-ai-wiki
+Author: AI Wiki Team
+Author-email: team@aiwiki.dev
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Framework :: Django
+Classifier: Topic :: Documentation
+Classifier: Topic :: Software Development :: Documentation
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: Flask>=2.0.0
+Requires-Dist: markdown2>=2.4.0
+Requires-Dist: openai>=0.27.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# code-wiki
+Auto-generate a browsable, searchable technical wiki from your Django REST codebase using AI.
