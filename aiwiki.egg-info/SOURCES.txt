@@ -1,0 +1,14 @@
+README.md
+setup.py
+aiwiki/__init__.py
+aiwiki/analyzer.py
+aiwiki/cli.py
+aiwiki/generators.py
+aiwiki/server.py
+aiwiki.egg-info/PKG-INFO
+aiwiki.egg-info/SOURCES.txt
+aiwiki.egg-info/dependency_links.txt
+aiwiki.egg-info/entry_points.txt
+aiwiki.egg-info/not-zip-safe
+aiwiki.egg-info/requires.txt
+aiwiki.egg-info/top_level.txt
