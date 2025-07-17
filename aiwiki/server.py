@@ -226,16 +226,21 @@ def ask_question():
             'docs': combined_docs
         }
         
-        # TODO: Replace with actual hosted API URL
-        api_url = "https://yourdomain.com/api/chat"
+        # API URL - Replace with your deployed Django AI Wiki API URL
+        api_url = "http://localhost:3000/api/chat"
+
+        # Optional: Add project API key if configured
+        headers = {'Content-Type': 'application/json'}
+        # Uncomment and set if you configured API_KEY in your deployed API:
+        # headers['x-api-key'] = 'your-project-api-key'
 
         # Try to make request to hosted API, fall back to mock response
         try:
             response = requests.post(
                 api_url,
                 json=api_payload,
-                timeout=10,
-                headers={'Content-Type': 'application/json'}
+                timeout=30,  # Increased timeout for AI processing
+                headers=headers
             )
 
             if response.status_code == 200:
