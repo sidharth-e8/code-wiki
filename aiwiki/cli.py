@@ -6,11 +6,47 @@ AI Wiki CLI - Command line interface for Django documentation generation
 import argparse
 import os
 import sys
+import requests
+import json
 from pathlib import Path
 
 from .analyzer import DjangoAnalyzer
 from .generators import MarkdownGenerator, MermaidGenerator, HTMLGenerator
 from .server import start_server
+
+
+def send_to_database(project_data: dict):
+    """Send project documentation to the dashboard database"""
+    try:
+        # Default API endpoint - can be configured via environment variable
+        api_url = os.getenv('AIWIKI_API_URL', 'http://localhost:3000/api/projects')
+
+        print(f"📤 Sending documentation to dashboard database...")
+
+        response = requests.post(
+            api_url,
+            json=project_data,
+            headers={'Content-Type': 'application/json'},
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Documentation stored in database successfully!")
+            print(f"📊 Project ID: {result.get('id', 'N/A')}")
+            return True
+        else:
+            print(f"⚠️  Failed to store in database (HTTP {response.status_code})")
+            print(f"   Response: {response.text}")
+            return False
+
+    except requests.exceptions.ConnectionError:
+        print(f"⚠️  Could not connect to dashboard API at {api_url}")
+        print(f"   Make sure the dashboard server is running with 'npm run dev'")
+        return False
+    except Exception as e:
+        print(f"⚠️  Error sending to database: {e}")
+        return False
 
 
 def generate_docs(target_path: str, settings_module: str):
@@ -78,10 +114,32 @@ def generate_docs(target_path: str, settings_module: str):
         print(f"   - project.md (markdown documentation)")
         print(f"   - diagram.md (Mermaid ERD diagram)")
         print(f"   - project.html (styled HTML documentation)")
+
+        # Store documentation in database
+        project_name = os.path.basename(os.path.abspath(target_path))
+        project_data = {
+            'name': project_name,
+            'path': os.path.abspath(target_path),
+            'settings_module': settings_module,
+            'markdown_content': markdown_content,
+            'html_content': html_content,
+            'diagram_content': diagram_content,
+            'models_count': models_count,
+            'serializers_count': serializers_count,
+            'views_count': views_count
+        }
+
+        database_success = send_to_database(project_data)
+
         print(f"\n💡 Next steps:")
-        print(f"   1. Run 'aiwiki serve' to browse documentation")
-        print(f"   2. Or open the files directly in your editor")
-        print(f"   3. Open project.html in your browser for visual documentation")
+        if database_success:
+            print(f"   1. Visit the dashboard at http://localhost:3000 to view your project")
+            print(f"   2. Run 'aiwiki serve' to browse documentation locally")
+            print(f"   3. Or open the files directly in your editor")
+        else:
+            print(f"   1. Run 'aiwiki serve' to browse documentation")
+            print(f"   2. Or open the files directly in your editor")
+            print(f"   3. Open project.html in your browser for visual documentation")
         
     except Exception as e:
         print(f"❌ Error generating documentation: {e}")
