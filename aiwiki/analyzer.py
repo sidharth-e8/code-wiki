@@ -93,39 +93,71 @@ class DjangoAnalyzer:
     def analyze_serializers(self) -> Dict[str, Any]:
         """Extract information from DRF serializers"""
         serializers_info = {}
-        
+
         for app_config in apps.get_app_configs():
             try:
                 # Try to import serializers module
                 serializers_module = importlib.import_module(f"{app_config.name}.serializers")
                 app_serializers = {}
-                
+
                 for name, obj in inspect.getmembers(serializers_module):
-                    if (inspect.isclass(obj) and 
-                        hasattr(obj, '_meta') and 
-                        hasattr(obj._meta, 'model')):
-                        
-                        serializer_info = {
-                            'name': name,
-                            'app': app_config.name,
-                            'model': obj._meta.model.__name__ if obj._meta.model else None,
-                            'fields': list(getattr(obj._meta, 'fields', [])),
-                            'exclude': list(getattr(obj._meta, 'exclude', [])),
-                            'read_only_fields': list(getattr(obj._meta, 'read_only_fields', [])),
-                            'docstring': inspect.getdoc(obj) or ""
-                        }
-                        
-                        app_serializers[name] = serializer_info
-                
+                    # Check if it's a class and looks like a DRF serializer
+                    if inspect.isclass(obj):
+                        is_serializer = False
+
+                        # Check if it inherits from Serializer
+                        for base in obj.__mro__:
+                            if base.__name__ in ('Serializer', 'ModelSerializer', 'HyperlinkedModelSerializer'):
+                                is_serializer = True
+                                break
+
+                        # Also check for _meta attribute (ModelForm style)
+                        if not is_serializer and hasattr(obj, '_meta') and hasattr(obj._meta, 'model'):
+                            is_serializer = True
+
+                        if is_serializer:
+                            # Get model name if it's a ModelSerializer
+                            model_name = None
+                            if hasattr(obj, 'Meta') and hasattr(obj.Meta, 'model'):
+                                model_name = obj.Meta.model.__name__
+                            elif hasattr(obj, '_meta') and hasattr(obj._meta, 'model'):
+                                model_name = obj._meta.model.__name__
+
+                            # Get fields
+                            fields = []
+                            exclude = []
+                            read_only_fields = []
+
+                            if hasattr(obj, 'Meta'):
+                                fields = list(getattr(obj.Meta, 'fields', []))
+                                exclude = list(getattr(obj.Meta, 'exclude', []))
+                                read_only_fields = list(getattr(obj.Meta, 'read_only_fields', []))
+                            elif hasattr(obj, '_meta'):
+                                fields = list(getattr(obj._meta, 'fields', []))
+                                exclude = list(getattr(obj._meta, 'exclude', []))
+                                read_only_fields = list(getattr(obj._meta, 'read_only_fields', []))
+
+                            serializer_info = {
+                                'name': name,
+                                'app': app_config.name,
+                                'model': model_name,
+                                'fields': fields,
+                                'exclude': exclude,
+                                'read_only_fields': read_only_fields,
+                                'docstring': inspect.getdoc(obj) or ""
+                            }
+
+                            app_serializers[name] = serializer_info
+
                 if app_serializers:
                     serializers_info[app_config.name] = app_serializers
-                    
+
             except ImportError:
                 # No serializers module in this app
                 continue
             except Exception as e:
                 print(f"Warning: Could not analyze serializers in {app_config.name}: {e}")
-        
+
         self.serializers_data = serializers_info
         return serializers_info
     
