@@ -49,14 +49,14 @@ def send_to_database(project_data: dict):
         return False
 
 
-def generate_docs(target_path: str, settings_module: str):
+def generate_docs(target_path: str, settings_module: str, debug: bool = False):
     """Generate documentation for Django project"""
     print(f"🔍 Analyzing Django project at: {target_path}")
     print(f"📋 Using settings: {settings_module}")
-    
+
     try:
         # Initialize analyzer
-        analyzer = DjangoAnalyzer(target_path, settings_module)
+        analyzer = DjangoAnalyzer(target_path, settings_module, debug=debug)
         
         # Perform analysis
         print("⚙️  Loading Django and analyzing project...")
@@ -190,6 +190,11 @@ Examples:
         required=True,
         help='Django settings module (e.g., myproject.settings)'
     )
+    generate_parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug output for troubleshooting'
+    )
     
     # Serve command
     serve_parser = subparsers.add_parser(
@@ -227,7 +232,7 @@ Examples:
                 print("   Aborted.")
                 sys.exit(1)
         
-        generate_docs(target_path, args.settings)
+        generate_docs(target_path, args.settings, debug=args.debug)
     
     elif args.command == 'serve':
         serve_docs(args.port)
